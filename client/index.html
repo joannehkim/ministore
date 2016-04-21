@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html ng-app='orders_customers'>
+
+<head>
+	<title>ORDERS AND CUSTOMERS</title>
+	<script type="text/javascript" script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+	<script type="text/javascript" script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-route.js"></script>
+	<link rel='stylesheet' href='./static/style.css'>
+
+	<script>
+	var orders_customers = angular.module('orders_customers', ['ngRoute']);
+
+	orders_customers.config(function($routeProvider) {
+		$routeProvider
+			.when('/',{
+				templateUrl: 'partials/view.html',
+				controller: 'ordersController'
+			})
+			.when('/partial2',{
+				templateUrl: 'partials/view3.html'
+			})
+			.when('/partial3',{
+				templateUrl: 'partials/view2.html'
+			})
+			.when('/partial4', {
+				templateUrl: 'partials/view1.html'
+			})
+			.when('/partial5', {
+				templateUtrl: 'partials/view4.html'
+			})
+			.otherwise({
+				redirectTo: '/'
+			});
+	});
+
+	// CUSTOMERS FACTORY //
+
+	orders_customers.factory('customersFactory', function($http) {
+		var factory = {};
+		var customers = [];
+
+		factory.getCustomers = function(callback) {
+			$http.get('/customers').success(function(output) {
+				customers = output;
+				callback(customers);
+			})
+		}
+
+		factory.addCustomer = function(data, callback) {
+			$http.post('/new/'+data).success(function(output) {
+				customers = output;
+				callback(customers);
+			})
+		}
+
+		factory.deleteCustomer = function(customer, callback) {
+			$http.post('/remove/'+customer).success(function(output) {
+				customers = output;
+				callback(customers);
+			})
+		}
+
+		return factory;
+	})
+
+
+	// ORDERS FACTORY //
+
+	orders_customers.factory('ordersFactory', function($http) {
+		var factory = {};
+		var orders = [];
+
+		factory.getOrders = function(callback) {
+			$http.get('/orders').success(function(output) {
+				orders = output;
+				callback(orders);
+			});
+		}
+
+		factory.addOrder = function(data, callback) {
+			$http.post('/addOrder', data).success(function(output) {
+				orders = output;
+				callback(orders);
+			})
+		}
+		return factory;
+	})
+
+
+	// PRODUCTS FACTORY //
+
+	orders_customers.factory('productsFactory', function($http) {
+		var factory = {};
+		var products = [];
+
+		factory.getProducts = function(callback) {
+			$http.get('/products').success(function(output) {
+				products = output;
+				callback(products);
+			})
+		}
+
+		factory.addProduct = function(data, callback) {
+			$http.post('/addProduct', data).success(function(output) {
+				products = output;
+				callback(products);
+			})
+		}
+
+		return factory;
+	})
+
+
+
+	// CUSTOMERS CONTROLLERS //
+
+	orders_customers.controller('customersController', function($scope, customersFactory) {
+
+		$scope.dupMessage = "";
+
+		customersFactory.getCustomers(function(data) {
+			$scope.customers = data;
+		})
+
+		$scope.addCustomer = function() {
+			if($scope.noDups() == true) {
+				return true;
+			} else {
+			customersFactory.addCustomer($scope.new_customer.name, function(data) {
+				$scope.customers = data;
+				$scope.new_customer = {};
+			});
+
+			}
+		}
+
+		$scope.noDups = function() {
+			for(var i=0; i<$scope.customers.length; i++) {
+				if($scope.new_customer !== undefined) {
+					if($scope.new_customer.name == $scope.customers[i].name) {
+						$scope.dupMessage = "";
+						return true;
+					}
+				}
+			}
+		}
+
+		$scope.deleteCustomer = function(customer) {
+			customersFactory.deleteCustomer(customer, function(data) {
+				$scope.customers = data;
+			})
+		}
+
+	});
+
+	// ORDERS CONTROLLERS //
+
+	orders_customers.controller('ordersController', function($scope, ordersFactory, customersFactory) {
+
+
+		customersFactory.getCustomers(function(data) {
+			$scope.customers = data;
+		})
+
+		$scope.products = ['Nike Shoes', 'Black Belts', 'Ice Creams', 'Candies'];
+		$scope.users = [];
+
+		ordersFactory.getOrders(function(data) {
+			$scope.orders = data;
+		});
+
+
+		$scope.addOrder = function() {
+			ordersFactory.addOrder($scope.new_order, function(data) {
+				$scope.orders = data;
+				$scope.new_order = {};
+			})
+		}
+
+	});
+
+	// PRODUCTS CONTROLLERS //
+
+	orders_customers.controller('productsController', function($scope, productsFactory) {
+
+		productsFactory.getProducts(function(data) {
+			$scope.products = data;
+		})
+
+		$scope.addProduct = function() {
+			productsFactory.addProduct($scope.new_product, function(data) {
+				$scope.products = data;
+				$scope.new_product = {};
+			})
+		}
+	});
+
+
+	</script>
+
+</head>
+
+
+<body ng-app='orders_customers'>
+	<a href='#/'>Dashboard</a> | <a href='#/partial2'>Products</a> | <a href='#/partial3'>Orders</a> | <a href='#/partial4'>Customers</a> | <a href='#/partial5'>Settings</a>
+	<div ng-view="">
+	</div>
+
+</body>
+
+</html>
+
+
+
+

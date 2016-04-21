@@ -1,0 +1,35 @@
+<div ng-controller='productsController'>
+
+<div id="container">
+	<div id="left">
+		<input type="text" ng-model="filter_name" placeholder="Search Name...">
+	</div>
+		
+		<div id="main">
+		<table>
+		<td ng-repeat="product in products | filter: filter_name">
+			<img ng-src='./static/images/{{product.img}}'>
+			{{ product.name }}<br>
+			{{ product.description }}<br>
+			({{ product.quantity }} left)<br><br>
+		</td>
+		</table>
+
+		<h4>Recent Orders</h4>
+		<ul>
+		<li ng-repeat="order in orders | filter: filter_name">
+			{{ order.name }} purchased {{ order.quantity }} {{ order.product }} {{order.created_at | date: format: timezone }}<br>
+		</li>
+		</ul>
+		<h4>New Customers</h4>
+		<ul>
+		<li ng-repeat="customer in customers | filter: filter_name">
+			{{ customer.name }} joined the store. ({{ customer.created_at | date: format: timezone }})
+		</ul>
+
+
+		</div>
+</div>
+
+</div>
+
